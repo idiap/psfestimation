@@ -35,14 +35,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 from toolbox import *
 from pandas.io.parsers import read_csv
-
-from pytoolbox.data.load_save import create_dir
 import glob
 import random
-from pytoolbox.image.random_image import *
-from pytoolbox.image.convolution import *
-from pytoolbox.image.utils import scale, to_8_bit
-from pytoolbox.image.filters import gaussian_kernel
 import numpy as np
 from skimage import io
 import argparse

@@ -40,9 +40,12 @@ import scipy
 import math
 import copy
 import sys
+import os
 from skimage.transform import rotate
 import bz2
 import torch
+import tifffile as tiff
+from imageio import imread as io_imread
 import pickle
 from matplotlib.backends.backend_pdf import PdfPages
 from matplotlib import pyplot as plt
@@ -57,6 +60,41 @@ def multipage(filename, figs=None, dpi=200):
     for fig in figs:
         fig.savefig(pp, format='pdf')
     pp.close()
+
+def create_dir(dirName):
+    if not os.path.exists(dirName):
+        os.makedirs(dirName)
+
+def write_tiff_stack(file_name, array, compression=None, rgb=False):
+    """ Script to export tif file to imageJ,
+
+    usage: tiff.write_stack(out_file_name, array, compression=None)
+    """
+    if libtiff_OK:
+        out_tiff = TIFF.open(file_name, mode='w')
+        a = np.flipud(array)
+        a = np.rollaxis(a, 3, 0)
+        print('Lib import : ', libtiff_OK)
+        for zInd in range(a.shape[3]):
+            out_tiff.write_image(a[:, :, :, zInd], compression=compression, write_rgb=rgb)
+
+        out_tiff.close()
+    else:
+        # for some reason, setting imagej=True gets an error from ImageJ with
+        # 3D stacks (t,X,Y). Hence the comment hereunder
+        imsave(file_name, array)  # , imagej=True)
+
+    return None
+
+def stretch_contrast(image, min_val=0.0, max_val=1.0):
+    """ Rescales the greylevels in an image """
+    curr_min = np.min(image)
+    curr_max = np.max(image)
+    image_ret = image - curr_min  # scale starts at zero
+    ratio = (max_val-min_val) / (curr_max-curr_min)
+    image_ret = image_ret * ratio + min_val
+
+    return image_ret
 
 
 def scale3d(v):
